@@ -1,0 +1,19 @@
+[project]
+name = "ava-mcp-server"
+version = "0.1.0"
+description = "A minimal MCP server demo for AVA using FastMCP."
+authors = [{ name = "Ben Yu" }]
+requires-python = ">=3.10"
+
+dependencies = [
+    "mcp", # Core Model Context Protocol package
+    "fastmcp", # FastMCP wrapper for easier server creation
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+exclude = ["prompts", "resources"]
