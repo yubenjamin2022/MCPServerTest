@@ -8,17 +8,19 @@ tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/deepseek-coder-6.7b-base"
 model = AutoModel.from_pretrained("deepseek-ai/deepseek-coder-6.7b-base", trust_remote_code=True)  
 model.eval()  
 
-def embed_code_ds(code_str):  
-    inputs = tokenizer(code_str, return_tensors="pt", padding=True, truncation=True, max_length=2048)  
-    with torch.no_grad():  
-        outputs = model(**inputs)  
-        # assume last_hidden_state first token  
-        cls_emb = outputs.last_hidden_state[:,0]  
-        cls_emb = F.normalize(cls_emb, p=2, dim=1)  
-    return cls_emb  
+def embed_code(code_str):
+    inputs = tokenizer(code_str, return_tensors="pt", padding=True, truncation=True, max_length=1024)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        mean_emb = outputs.last_hidden_state.mean(dim=1)
+        mean_emb = F.normalize(mean_emb, p=2, dim=1)
+    return mean_emb
 
-def cosine_sim(a, b):  
-    return (a @ b.T).item()  
+
+def cosine_sim(a, b):
+    a = a / a.norm(dim=-1, keepdim=True)
+    b = b / b.norm(dim=-1, keepdim=True)
+    return (a @ b.T).item()
 
 func1 = """def count_lines(filepath: str) -> int:
     with open(filepath, "r", encoding="utf-8") as f:

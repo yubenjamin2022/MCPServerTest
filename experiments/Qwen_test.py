@@ -1,11 +1,11 @@
-# Example for BGE-M3 embedding + cosine similarity  
-from transformers import AutoTokenizer, AutoModel  
+from transformers import AutoModel, AutoTokenizer
 import torch  
 import torch.nn.functional as F  
 
-# load model & tokenizer  
-tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3", trust_remote_code=True)  
-model = AutoModel.from_pretrained("BAAI/bge-m3", trust_remote_code=True)  
+model_id = "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModel.from_pretrained(model_id)
 model.eval()  
 
 def embed_code(code_str):
@@ -15,6 +15,7 @@ def embed_code(code_str):
         mean_emb = outputs.last_hidden_state.mean(dim=1)
         mean_emb = F.normalize(mean_emb, p=2, dim=1)
     return mean_emb
+ 
 
 def cosine_sim(a, b):
     a = a / a.norm(dim=-1, keepdim=True)
@@ -30,7 +31,7 @@ func2_task1 = """def sum_two(x, y):\n    result = x + y\n    return result"""
 emb1_task1 = embed_code(func1_task1)  
 emb2_task1 = embed_code(func2_task1)  
 
-print("BGE-M3 similarity for two simple, same functions:", cosine_sim(emb1_task1, emb2_task1))
+print("Qwen2 similarity for two simple, same functions:", cosine_sim(emb1_task1, emb2_task1))
 
 #############################################################
 # TASK 2: Two simple and different functions                     
@@ -47,7 +48,7 @@ func2_task2 = """def fibonacci(n: int) -> int:
 emb1_task2 = embed_code(func1_task2)  
 emb2_task2 = embed_code(func2_task2)  
 
-print("BGE-M3 similarity for 2 small, different Python functions:", cosine_sim(emb1_task2, emb2_task2))
+print("Qwen2 similarity for 2 small, different Python functions:", cosine_sim(emb1_task2, emb2_task2))
 
 #############################################################
 # TASK 3: Two longer and similar functions                     
@@ -89,7 +90,7 @@ func2_task3 = """def normalize_text_v2(sentence, remove_stopwords=True):
 emb1_task3 = embed_code(func1_task3)  
 emb2_task3 = embed_code(func2_task3)  
 
-print("BGE-M3 similarity for 2 more complex, same Python functions:", cosine_sim(emb1_task3, emb2_task3))
+print("Qwen2 similarity for 2 more complex, same Python functions:", cosine_sim(emb1_task3, emb2_task3))
 
 
 #############################################################
@@ -147,7 +148,7 @@ func2_task4 = """def generate_random_password(length=16, include_symbols=True):
 emb1_task4 = embed_code(func1_task4)  
 emb2_task4 = embed_code(func2_task4)  
 
-print("BGE-M3 similarity for 2 more complex, different Python functions:", cosine_sim(emb1_task4, emb2_task4))
+print("Qwen2 similarity for 2 more complex, different Python functions:", cosine_sim(emb1_task4, emb2_task4))
 
 #############################################################
 # TASK 5: Two longer and similar functions (bad variable names)                    
@@ -192,7 +193,7 @@ func2_task5 = """def do_other_thing_v2(q, hmm=True):
 emb1_task5 = embed_code(func1_task5)
 emb2_task5 = embed_code(func2_task5)
 
-print("BGE-M3 similarity for 2 similar messy functions:", cosine_sim(emb1_task5, emb2_task5))
+print("Qwen2 similarity for 2 similar messy functions:", cosine_sim(emb1_task5, emb2_task5))
 
 #############################################################
 # TASK 6: Two longer and different functions (bad variable names)                    
@@ -236,5 +237,5 @@ func2_task6 = """def make_id(thing='X', num=9):
 emb1_task6 = embed_code(func1_task6)
 emb2_task6 = embed_code(func2_task6)
 
-print("BGE-M3 similarity for 2 very different messy functions:", cosine_sim(emb1_task6, emb2_task6))
+print("Qwen2 similarity for 2 very different messy functions:", cosine_sim(emb1_task6, emb2_task6))
 
