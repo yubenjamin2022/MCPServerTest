@@ -4,7 +4,8 @@ import torch
 import torch.nn.functional as F  
 
 model_dir = "BAAI/bge-m3"
-model_id = "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+# model_dir = "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+#model_dir = "deepseek-ai/deepseek-coder-6.7b-base"
 
 # load model & tokenizer  
 tokenizer = AutoTokenizer.from_pretrained(model_dir)  
@@ -32,8 +33,9 @@ func2_task1 = """def sum_two(x, y):\n    result = x + y\n    return result"""
 
 emb1_task1 = embed_code(func1_task1)  
 emb2_task1 = embed_code(func2_task1)  
+cos1 = cosine_sim(emb1_task1, emb2_task1)
 
-print("BGE-M3 similarity for two simple, same functions:", cosine_sim(emb1_task1, emb2_task1))
+print("Encoder similarity for two simple, same functions:", cos1)
 
 #############################################################
 # TASK 2: Two simple and different functions                     
@@ -48,9 +50,12 @@ func2_task2 = """def fibonacci(n: int) -> int:
     return fibonacci(n - 1) + fibonacci(n - 2)"""  
 
 emb1_task2 = embed_code(func1_task2)  
-emb2_task2 = embed_code(func2_task2)  
+emb2_task2 = embed_code(func2_task2) 
+cos2 = cosine_sim(emb1_task2, emb2_task2)
 
-print("BGE-M3 similarity for 2 small, different Python functions:", cosine_sim(emb1_task2, emb2_task2))
+print("Encoder similarity for 2 small, different Python functions:", cos2)
+
+print("Difference between simple similar and simple different: ", cos1 - cos2)
 
 #############################################################
 # TASK 3: Two longer and similar functions                     
@@ -91,8 +96,9 @@ func2_task3 = """def normalize_text_v2(sentence, remove_stopwords=True):
 """
 emb1_task3 = embed_code(func1_task3)  
 emb2_task3 = embed_code(func2_task3)  
+cos3 = cosine_sim(emb1_task3, emb2_task3)
 
-print("BGE-M3 similarity for 2 more complex, same Python functions:", cosine_sim(emb1_task3, emb2_task3))
+print("Encoder similarity for 2 more complex, same Python functions:",cos3)
 
 
 #############################################################
@@ -148,9 +154,12 @@ func2_task4 = """def generate_random_password(length=16, include_symbols=True):
     return password
 """
 emb1_task4 = embed_code(func1_task4)  
-emb2_task4 = embed_code(func2_task4)  
+emb2_task4 = embed_code(func2_task4) 
+cos4 = cosine_sim(emb1_task4, emb2_task4)
 
-print("BGE-M3 similarity for 2 more complex, different Python functions:", cosine_sim(emb1_task4, emb2_task4))
+print("Encoder similarity for 2 more complex, different Python functions:", cos4)
+
+print("Difference between more complex similar and simple different: ", cos3 - cos4)
 
 #############################################################
 # TASK 5: Two longer and similar functions (bad variable names)                    
@@ -194,8 +203,9 @@ func2_task5 = """def do_other_thing_v2(q, hmm=True):
 
 emb1_task5 = embed_code(func1_task5)
 emb2_task5 = embed_code(func2_task5)
+cos5 = cosine_sim(emb1_task5, emb2_task5)
 
-print("BGE-M3 similarity for 2 similar messy functions:", cosine_sim(emb1_task5, emb2_task5))
+print("Encoder similarity for 2 similar messy functions:", cos5)
 
 #############################################################
 # TASK 6: Two longer and different functions (bad variable names)                    
@@ -238,6 +248,8 @@ func2_task6 = """def make_id(thing='X', num=9):
 
 emb1_task6 = embed_code(func1_task6)
 emb2_task6 = embed_code(func2_task6)
+cos6 = cosine_sim(emb1_task6, emb2_task6)
 
-print("BGE-M3 similarity for 2 very different messy functions:", cosine_sim(emb1_task6, emb2_task6))
+print("Encoder similarity for 2 very different messy functions:", cos6)
 
+print("Difference between more complex similar and more complex different (remove comments + variable names): ", cos5 - cos6)

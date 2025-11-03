@@ -1,8 +1,8 @@
-import quests.compression
 import ast, inspect, textwrap
 from transformers import AutoModel, AutoTokenizer
 import torch  
 import torch.nn.functional as F  
+import numpy as np
 
 class FunctionParser():
     """
@@ -20,13 +20,14 @@ class FunctionParser():
 
     """
     
-    def __init__(self, filepath, model_id):
+    def __init__(self, filepath, model_id, cutoff = 2):
         self.content = self.read_file(filepath)
         self.functions = self.extract_functions_from_class()
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id)
         self.model.eval()  
-        self.embeddings = [self.embed_code(fun) for fun in self.functions]
+        self.embeddings = np.array([self.embed_code(fun).reshape(-1).cpu().detach().numpy() for fun in self.functions])
+        self.cutoff = cutoff
 
     def read_file(self, filepath) -> str:
         """
@@ -66,7 +67,7 @@ class FunctionParser():
                             "\n".join(self.content.splitlines()[body_item.lineno - 1 : body_item.end_lineno])
                         )
                         functions.append(func_source)
-        return functions[2:]
+        return functions[self.cutoff:]
     
     def embed_code(self, code_str):
         """
