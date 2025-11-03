@@ -9,11 +9,6 @@ class FunctionParser():
 
     Given a Python tool (examples in classes), seperate into functions and embed it 
 
-    Attributes:
-    
-    content (str): the raw content of the Python file
-    functions (list): list of all of the (relevant) Python functions
-
     Assumption: the files are python classes, which are valid with comments
 
     Didn't include guardrails (i.e. checking if file is a Python file, etc.), very barebones
@@ -21,12 +16,15 @@ class FunctionParser():
     """
     
     def __init__(self, filepath, model_id, cutoff = 2):
+        self.filepath = filepath
         self.content = self.read_file(filepath)
+        self.function_names = self.get_function_names()
         self.functions = self.extract_functions_from_class()
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id)
         self.model.eval()  
         self.embeddings = np.array([self.embed_code(fun).reshape(-1).cpu().detach().numpy() for fun in self.functions])
+        self.class_embeddings = self.embed_code(self.content)
         self.cutoff = cutoff
 
     def read_file(self, filepath) -> str:
@@ -46,6 +44,24 @@ class FunctionParser():
             file_content = file.read()
         
         return file_content
+    
+    def get_function_names(self):
+        """
+
+        Given the Python file's contents, return all of the relevant function names.
+
+        Assume no async functions for now. 
+
+        """
+
+        function_names = []
+        with open(self.filepath, 'r') as file:
+            tree = ast.parse(file.read())
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                function_names.append(node.name)
+        return function_names
     
     def extract_functions_from_class(self):
         """
