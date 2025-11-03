@@ -3,9 +3,12 @@ from transformers import AutoTokenizer, AutoModel
 import torch  
 import torch.nn.functional as F  
 
+model_dir = "BAAI/bge-m3"
+model_id = "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+
 # load model & tokenizer  
-tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3", trust_remote_code=True)  
-model = AutoModel.from_pretrained("BAAI/bge-m3", trust_remote_code=True)  
+tokenizer = AutoTokenizer.from_pretrained(model_dir)  
+model = AutoModel.from_pretrained(model_dir)  
 model.eval()  
 
 def embed_code(code_str):

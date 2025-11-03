@@ -86,12 +86,12 @@ class MatrixAnalysisTool(BaseTool):
         c, d = A[1]
         trace = a + d
         det = a*d - b*c
-        Δ = trace**2 - 4*det
-        if Δ >= 0:
-            sqrtΔ = sqrt(Δ)
-            return [(trace + sqrtΔ)/2, (trace - sqrtΔ)/2]
+        delta = trace**2 - 4*det
+        if delta >= 0:
+            sqrtdelta = sqrt(delta)
+            return [(trace + sqrtdelta)/2, (trace - sqrtdelta)/2]
         else:
-            re, im = trace/2, sqrt(-Δ)/2
+            re, im = trace/2, sqrt(-delta)/2
             return [{"real": re, "imag": im}, {"real": re, "imag": -im}]
 
     def compute_eigenvectors(self, A):
@@ -102,9 +102,9 @@ class MatrixAnalysisTool(BaseTool):
         a, b = A[0]
         c, d = A[1]
         vecs = []
-        for λ in vals:
-            # Solve (A - λI)v = 0
-            m = [[a - λ, b], [c, d - λ]]
+        for lam in vals:
+            # Solve (A - lambda*I)v = 0
+            m = [[a - lam, b], [c, d - lam]]
             if abs(m[0][0]) > abs(m[1][1]):
                 v = [m[0][1], -m[0][0]]
             else:

@@ -31,7 +31,7 @@ func2 = """def fibonacci(n: int) -> int:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)"""  
 
-emb1_ds = embed_code_ds(func1)  
-emb2_ds = embed_code_ds(func2)  
+emb1_ds = embed_code(func1)  
+emb2_ds = embed_code(func2)  
 
 print("DeepSeek-Coder similarity:", cosine_sim(emb1_ds, emb2_ds))

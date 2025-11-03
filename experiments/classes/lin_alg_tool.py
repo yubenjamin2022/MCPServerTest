@@ -70,9 +70,9 @@ class LinearAlgebraTool(BaseTool):
         discriminant = trace ** 2 - 4 * det
         if discriminant >= 0:
             sqrt_disc = sqrt(discriminant)
-            λ1 = (trace + sqrt_disc) / 2
-            λ2 = (trace - sqrt_disc) / 2
-            return [λ1, λ2]
+            lambda1 = (trace + sqrt_disc) / 2
+            lambda2 = (trace - sqrt_disc) / 2
+            return [lambda1, lambda2]
         else:
             # complex eigenvalues (return as dicts)
             real = trace / 2
