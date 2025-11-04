@@ -13,9 +13,9 @@ if __name__ == "__main__":
 
     # initialize function parsers for each of the classes & models
 
-    parser_linalg = FunctionParser('experiments\classes\lin_alg_tool.py', model_id)
-    parser_mat = FunctionParser('experiments\classes\matrix_analysis_tool.py', model_id)
-    parser_deriv = FunctionParser('experiments\classes\derivative_approx.py', model_id)
+    parser_linalg = FunctionParser('experiments\classes\lin_alg_tool.py', model_id, 2)
+    parser_mat = FunctionParser('experiments\classes\matrix_analysis_tool.py', model_id, 2)
+    parser_deriv = FunctionParser('experiments\classes\derivative_approx.py', model_id, 2)
 
     parsers = [parser_linalg, parser_mat, parser_deriv]
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
                                           for a in range(len(parser_1.embeddings))] 
                                          for b in range(len(parser_2.embeddings))]
                                         )
-            
+             
             fig, ax = plt.subplots()
             im = ax.imshow(similarity_scores)
 
@@ -35,11 +35,11 @@ if __name__ == "__main__":
                         rotation=45, ha="right", rotation_mode="anchor")
             ax.set_yticks(range(len(parser_2.function_names)), labels=parser_2.function_names)
 
-            # Loop over data dimensions and create text annotations.
-            for c in range(len(parser_2.function_names)):
-                for d in range(len(parser_1.function_names)):
-                    text = ax.text(d, c, similarity_scores[c, d],
+            for c in range(len(parser_2.embeddings)):     
+                for d in range(len(parser_1.embeddings)):  
+                    text = ax.text(d, c, np.round(similarity_scores[c, d], 2),
                                 ha="center", va="center", color="w")
+
 
             ax.set_title(f"Cosine similarity between functions of Class {i} and Class {j}")
             fig.tight_layout()
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # Loop over data dimensions and create text annotations.
     for c in range(len(parsers)):
         for d in range(len(parsers)):
-            text = ax.text(d, c, similarity_scores[c, d],
+            text = ax.text(d, c, np.round(similarity_scores[c, d], 2),
                         ha="center", va="center", color="w")
 
     ax.set_title(f"Cosine similarity between classes 1, 2, and 3")

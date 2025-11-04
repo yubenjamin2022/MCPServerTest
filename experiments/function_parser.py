@@ -17,15 +17,15 @@ class FunctionParser():
     
     def __init__(self, filepath, model_id, cutoff = 2):
         self.filepath = filepath
+        self.cutoff = cutoff
         self.content = self.read_file(filepath)
         self.function_names = self.get_function_names()
         self.functions = self.extract_functions_from_class()
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id)
         self.model.eval()  
-        self.embeddings = np.array([self.embed_code(fun).reshape(-1).cpu().detach().numpy() for fun in self.functions])
+        self.embeddings = [self.embed_code(fun) for fun in self.functions]
         self.class_embeddings = self.embed_code(self.content)
-        self.cutoff = cutoff
 
     def read_file(self, filepath) -> str:
         """
@@ -47,42 +47,65 @@ class FunctionParser():
     
     def get_function_names(self):
         """
-
         Given the Python file's contents, return all of the relevant function names.
 
-        Assume no async functions for now. 
-
+        - Ignores async functions (per assumption)
+        - Skips nested functions (inside other functions)
+        - Keeps both top-level functions and class methods
         """
-
         function_names = []
+
         with open(self.filepath, 'r') as file:
             tree = ast.parse(file.read())
 
-        for node in ast.walk(tree):
+        # Only check top-level nodes, not recursively
+        for node in tree.body:
             if isinstance(node, ast.FunctionDef):
                 function_names.append(node.name)
-        return function_names
+            elif isinstance(node, ast.ClassDef):
+                for body_item in node.body:
+                    if isinstance(body_item, ast.FunctionDef):
+                        function_names.append(body_item.name)
+
+        return function_names[self.cutoff:]
     
     def extract_functions_from_class(self):
         """
+        Given the Python file's contents, return all the (relevant) functions 
+        (i.e. not the __init__ or the run functions).
 
-        Given the Python file's contents, return all the (relevant) functions (i.e. not the __init__ or the run functions)
-
-        Assumption: the Python file is a class with at least 3 functions, __init__, run, and at least one tool
-
+        Assumption: the Python file is a class with at least 3 functions: 
+        __init__, run, and at least one tool function.
         """
         tree = ast.parse(self.content)
         functions = []
 
-        for node in ast.walk(tree):
+        # Iterate only through top-level statements
+        for node in tree.body:
             if isinstance(node, ast.ClassDef):
+                # Only get top-level methods in the class, not nested ones
                 for body_item in node.body:
                     if isinstance(body_item, ast.FunctionDef):
-                        # Get exact function source by slicing from node.lineno
+                        # Skip __init__ and run
+                        if body_item.name in {"__init__", "run"}:
+                            continue
                         func_source = textwrap.dedent(
-                            "\n".join(self.content.splitlines()[body_item.lineno - 1 : body_item.end_lineno])
+                            "\n".join(
+                                self.content.splitlines()[body_item.lineno - 1 : body_item.end_lineno]
+                            )
                         )
                         functions.append(func_source)
+            elif isinstance(node, ast.FunctionDef):
+                # Include top-level functions (if needed)
+                if node.name in {"__init__", "run"}:
+                    continue
+                func_source = textwrap.dedent(
+                    "\n".join(
+                        self.content.splitlines()[node.lineno - 1 : node.end_lineno]
+                    )
+                )
+                functions.append(func_source)
+
         return functions[self.cutoff:]
     
     def embed_code(self, code_str):

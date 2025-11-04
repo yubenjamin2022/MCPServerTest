@@ -22,7 +22,7 @@ class NaturalLanguageParser():
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModel.from_pretrained(model_id)
         self.model.eval()  
-        self.embeddings = np.array([self.embed_code(fun).reshape(-1).cpu().detach().numpy() for fun in self.functions])
+        self.embeddings = [self.embed_code(fun) for fun in self.functions]
     
     def get_function_names(self):
         """
@@ -45,10 +45,15 @@ class NaturalLanguageParser():
         
         function_name = f"Function name: {function['name']}"
         function_description = f"Description: {function['description']}"
-        required_params = "Required Parameters: \n" + '\n'.join([f"{param['name']} ({param['type']}) \n Description: {param['description']}"] 
-                                    for param in function['required_parameters'])
-        optional_params = "Optional Parameters: \n" + '\n'.join([f"{param['name']} ({param['type']}) \n Description: {param['description']} \n Default value: {param['default']}"] 
-                                    for param in function['optional_parameters'])
+        required_params = "Required Parameters:\n" + '\n'.join(
+            f"{param['name']} ({param['type']})\nDescription: {param['description']}"
+            for param in function['required_parameters']
+        )
+
+        optional_params = "Optional Parameters:\n" + '\n'.join(
+            f"{param['name']} ({param['type']})\nDescription: {param['description']}\nDefault value: {param['default']}"
+            for param in function['optional_parameters']
+        )
 
         return '\n'.join([function_name, function_description, required_params, optional_params])
     
